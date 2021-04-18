@@ -104,10 +104,10 @@ namespace CreateFolderFromCreationDate
         {
             //Check if we have a valid output directory
             if (!String.IsNullOrEmpty(txtLocationToGenerate.Text) && Directory.Exists(txtLocationToGenerate.Text))
-            {
-                List<DateTime> validDates = new List<DateTime>();
+            {                
                 foreach (var file in FilesWithInfoExtended)
                 {
+                    List<DateTime> validDates = new List<DateTime>();
                     validDates.Add(file.ExtendedInfo.LastWriteTime);
                     validDates.Add(file.ExtendedInfo.CreationTime);
 
