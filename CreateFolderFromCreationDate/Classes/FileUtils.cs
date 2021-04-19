@@ -1,11 +1,8 @@
-﻿using log4net;
-using log4net.Repository.Hierarchy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using Directory = System.IO.Directory;
 
 namespace CreateFolderFromCreationDate
 {
@@ -84,32 +81,67 @@ namespace CreateFolderFromCreationDate
             return pathList;
         }
 
-        private List<string> GetFiles(string initialDir, bool recursiveSearch, string[] extensionFilters)
+        /// <summary>
+        /// Returns the EXIF Image Data of the Date Taken.
+        /// </summary>
+        /// <param name="getImage">Image (If based on a file use Image.FromFile(f);)</param>
+        /// <returns>Date Taken or Null if Unavailable</returns>
+        public static DateTime DateTaken(string dateTakenTag)
         {
-            //Get files in root directory
-            List<string> files = null;
+            string[] parts = dateTakenTag.Split(':', ' ');
+            int year = int.Parse(parts[0]);
+            int month = int.Parse(parts[1]);
+            int day = int.Parse(parts[2]);
+            int hour = int.Parse(parts[3]);
+            int minute = int.Parse(parts[4]);
+            int second = int.Parse(parts[5]);
 
-            if (extensionFilters != null)
+            return new DateTime(year, month, day, hour, minute, second);
+        }
+
+        public bool IsExifFormat(string dateFormat)
+        {
+            bool isExifFormat = false;
+            int count = dateFormat.Count(f => f == ':');
+
+            if (count > 5)
             {
-                files = extensionFilters.SelectMany(filter => Directory.GetFiles(initialDir, filter)).ToList();
+                isExifFormat = true;
             }
-            else
-            {
-                files = Directory.GetFiles(initialDir).ToList();
-            }
 
-            if (recursiveSearch)
-            {
-                var dir = Directory.GetDirectories(initialDir);
+            return isExifFormat;
+        }
 
-                foreach (var subDir in dir)
+        public int GetMinimunYear(FileInfoExtended file)
+        {
+            List<DateTime> validDates = new List<DateTime>();
+            validDates.Add(file.ExtendedInfo.LastWriteTime);
+            validDates.Add(file.ExtendedInfo.CreationTime);
+
+            var dateRelatedMetadatas = file.Metadatas.Where(o => o.Metadata != null && o.Metadata.ToLower().Contains("date"));
+            foreach (var metadata in dateRelatedMetadatas)
+            {
+                try
                 {
-                    var subItems = extensionFilters.SelectMany(filter => Directory.GetFiles(subDir, filter)).ToList();
-                    files.AddRange(subItems);
+                    if (IsExifFormat(metadata.Description))
+                    {
+                        validDates.Add(DateTaken(metadata.Description));
+                    }
+                    else
+                    {
+                        validDates.Add(DateTime.Parse(metadata.Description));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
                 }
             }
 
-            return files;
+            //Get little value in date as valid year
+            int year = validDates.Min(a => a).Year;
+
+            return year;
         }
     }
 }
