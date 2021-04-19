@@ -1,5 +1,4 @@
-﻿using log4net;
-using log4net.Config;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,14 +10,14 @@ namespace CreateFolderFromCreationDate
 {
     public partial class FrmMain : Form
     {
-        const string InfoMessage = "CreateFolderFromCreationDate V1.0";
-        
+        const string InfoMessage = "CreateFolderFromCreationDate v1.1";
+
         public ILog _logger = Logger.Create();
         private readonly FileUtils Utils = new FileUtils();
         private BindingSource BindingSource = new BindingSource();
         private List<string> FilesPathList = new List<string>();
         private List<FileInfoExtended> FilesWithInfoExtended = new List<FileInfoExtended>();
-        
+
         public FrmMain()
         {
             InitializeComponent();
@@ -32,7 +31,7 @@ namespace CreateFolderFromCreationDate
             dgvFiles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             //Start log
-            _logger.Info("Starting app...");
+            _logger.Info("Starting " + InfoMessage);
         }
 
         private void HelpToolStripButton_Click(object sender, EventArgs e)
@@ -85,7 +84,7 @@ namespace CreateFolderFromCreationDate
                 openFileDialog.CheckPathExists = true;
                 openFileDialog.FileName = folderSel;
 
-                openFileDialog.InitialDirectory = "C:\\";
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 openFileDialog.Filter = "All files (*.*)|*.*";
                 openFileDialog.FilterIndex = 2;
                 openFileDialog.RestoreDirectory = true;
@@ -104,63 +103,12 @@ namespace CreateFolderFromCreationDate
         {
             //Check if we have a valid output directory
             if (!String.IsNullOrEmpty(txtLocationToGenerate.Text) && Directory.Exists(txtLocationToGenerate.Text))
-            {                
-                foreach (var file in FilesWithInfoExtended)
-                {
-                    List<DateTime> validDates = new List<DateTime>();
-                    validDates.Add(file.ExtendedInfo.LastWriteTime);
-                    validDates.Add(file.ExtendedInfo.CreationTime);
-
-                    var dateRelatedMetadatas = file.Metadatas.Where(o => o.Metadata != null && o.Metadata.ToLower().Contains("date"));
-                    foreach (var metadata in dateRelatedMetadatas)
-                    {
-                        try
-                        {
-                            validDates.Add(DateTime.Parse(metadata.Description));
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.Error(ex.Message);
-                        }
-                    }
-
-                    //Get little value in date as valid year
-                    int year = validDates.Min(a => a).Year;
-
-                    //If directory not exist we create it
-                    string folderPath = txtLocationToGenerate.Text + "\\" + year;
-                    if (!Directory.Exists(folderPath))
-                    {
-                        Directory.CreateDirectory(folderPath);
-                        _logger.Info("Directory " + folderPath + " created.");
-                    }
-
-                    try
-                    {
-                        //Check if we can move this file
-                        int counter = 0;
-                        var fileToMoveNewPath = folderPath + "\\" + file.Name;
-                        while (File.Exists(fileToMoveNewPath))
-                        {
-                            counter++;
-                            fileToMoveNewPath = folderPath + "\\" + file.NameWithoutExtension + "-" + counter + file.ExtendedInfo.Extension;
-                        }
-
-                        //Move file
-                        file.ExtendedInfo.MoveTo(fileToMoveNewPath);
-                        _logger.Error("Info - Moved file to: " + fileToMoveNewPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error("Error - " + ex.Message);
-                    }
-                }
-
-                MessageBox.Show("Process finished... " + FilesWithInfoExtended.Count + " items moved.");
+            {
+                StartMoveFilesProcess();
             }
             else
             {
-                MessageBox.Show("Set a location for output");
+                MessageBox.Show("Set a location for output", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -178,5 +126,44 @@ namespace CreateFolderFromCreationDate
                 txtLocationToGenerate.Text = folderName;
             }
         }
+
+        private void StartMoveFilesProcess()
+        {
+            foreach (var file in FilesWithInfoExtended)
+            {
+                int year = Utils.GetMinimunYear(file);
+
+                //If directory not exist we create it
+                string folderPath = txtLocationToGenerate.Text + "\\" + year;
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                    _logger.Info("Directory " + folderPath + " created.");
+                }
+
+                try
+                {
+                    //Check if we can move this file
+                    int counter = 0;
+                    var fileToMoveNewPath = folderPath + "\\" + file.Name;
+                    while (File.Exists(fileToMoveNewPath))
+                    {
+                        counter++;
+                        fileToMoveNewPath = folderPath + "\\" + file.NameWithoutExtension + "-" + counter + file.ExtendedInfo.Extension;
+                    }
+
+                    //Move file
+                    file.ExtendedInfo.MoveTo(fileToMoveNewPath);
+                    _logger.Info("Moved file to: " + fileToMoveNewPath);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
+                }
+            }
+
+            MessageBox.Show("Process finished... " + FilesWithInfoExtended.Count + " items moved.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
     }
 }
