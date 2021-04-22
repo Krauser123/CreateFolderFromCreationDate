@@ -10,10 +10,10 @@ namespace CreateFolderFromCreationDate
 {
     public partial class FrmMain : Form
     {
-        const string InfoMessage = "CreateFolderFromCreationDate v1.1";
+        const string InfoMessage = "CreateFolderFromCreationDate v1.2";
 
-        public ILog _logger = Logger.Create();
-        private readonly FileUtils Utils = new FileUtils();
+        private ILog _logger = Logger.Create();
+        private FileUtils Utils = new FileUtils();
         private BindingSource BindingSource = new BindingSource();
         private List<string> FilesPathList = new List<string>();
         private List<FileInfoExtended> FilesWithInfoExtended = new List<FileInfoExtended>();
