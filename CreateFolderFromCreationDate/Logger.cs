@@ -3,6 +3,7 @@ using log4net.Repository.Hierarchy;
 using log4net.Core;
 using log4net.Appender;
 using log4net.Layout;
+using System;
 
 namespace CreateFolderFromCreationDate
 {

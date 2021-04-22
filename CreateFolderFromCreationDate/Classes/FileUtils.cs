@@ -1,6 +1,7 @@
 using log4net;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -85,6 +86,21 @@ namespace CreateFolderFromCreationDate
         }
 
         /// <summary>
+        /// Returns the EXIF Image Data of the Date Taken GPS.
+        /// </summary>
+        /// <param name="getImage">Image (If based on a file use Image.FromFile(f);)</param>
+        /// <returns>Date Taken or Null if Unavailable</returns>
+        public static DateTime DateGPSTaken(string dateTakenTag)
+        {
+            string[] parts = dateTakenTag.Split(':', ' ');
+            int year = int.Parse(parts[0]);
+            int month = int.Parse(parts[1]);
+            int day = int.Parse(parts[2]);
+
+            return new DateTime(year, month, day);
+        }
+
+        /// <summary>
         /// Returns the EXIF Image Data of the Date Taken.
         /// </summary>
         /// <param name="getImage">Image (If based on a file use Image.FromFile(f);)</param>
@@ -107,7 +123,20 @@ namespace CreateFolderFromCreationDate
             bool isExifFormat = false;
             int count = dateFormat.Count(f => f == ':');
 
-            if (count > 5)
+            if (count >= 4)
+            {
+                isExifFormat = true;
+            }
+
+            return isExifFormat;
+        }
+
+        public bool IsExifGPSFormat(string dateFormat)
+        {
+            bool isExifFormat = false;
+            int count = dateFormat.Count(f => f == ':');
+
+            if (count == 2 && dateFormat.Length == 10)
             {
                 isExifFormat = true;
             }
@@ -126,18 +155,11 @@ namespace CreateFolderFromCreationDate
             {
                 try
                 {
-                    if (IsExifFormat(metadata.Description))
-                    {
-                        validDates.Add(DateTaken(metadata.Description));
-                    }
-                    else
-                    {
-                        validDates.Add(DateTime.Parse(metadata.Description));
-                    }
+                    validDates.Add(GetDateTimeFromMetadata(metadata));
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex.Message);
+                    _logger.Error(ex.Message + " - Metadata: " + metadata.Metadata + " - Value " + metadata.Description);
                 }
             }
 
@@ -145,6 +167,33 @@ namespace CreateFolderFromCreationDate
             int year = validDates.Min(a => a).Year;
 
             return year;
+        }
+
+        private DateTime GetDateTimeFromMetadata(MetaData metadata)
+        {
+            DateTime dateToReturn;
+
+            if (IsExifFormat(metadata.Description))
+            {
+                dateToReturn = DateTaken(metadata.Description);
+            }
+            else if (IsExifGPSFormat(metadata.Description))
+            {
+                dateToReturn = DateGPSTaken(metadata.Description);
+            }
+            else
+            {
+                bool isValidDateTime = DateTime.TryParse(metadata.Description, out DateTime dateConverted);
+
+                if (!isValidDateTime)
+                {
+                    dateConverted = DateTime.ParseExact(metadata.Description, "ddd MMM dd HH:mm:ss K yyyy", CultureInfo.InvariantCulture);
+                }
+
+                dateToReturn = dateConverted;
+            }
+
+            return dateToReturn;
         }
     }
 }

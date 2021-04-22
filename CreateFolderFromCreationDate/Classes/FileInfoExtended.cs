@@ -78,7 +78,7 @@ namespace CreateFolderFromCreationDate
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error");
+                mLog.Error(ex.Message);
             }
         }
 
