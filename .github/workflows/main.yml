@@ -1,0 +1,81 @@
+name: Build .Net Forms and publish realease
+
+#Trigger
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+      
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      
+    - name: Navigate to Workspace
+      run: cd $GITHUB_WORKSPACE
+      
+    - name: Restore Packages
+      run: nuget restore CreateFolderFromCreationDate.sln
+
+    - name: Build Solution
+      run: |
+        msbuild.exe CreateFolderFromCreationDate.sln /nologo /nr:false /p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=True /p:platform="Any CPU" /p:configuration="Release" /p:PublishUrl="../_build"
+    
+    - name: See curent dir
+      run: dir    
+    
+    - name: 'Zip files'
+      run: 7z a -tzip D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\release-artifact.zip D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release
+      continue-on-error: true
+        
+    - run: dir D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: release-artifact
+        path: D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\
+
+    - run: dir D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Changes in this Release
+          - Improvements, bugs, see the commits...
+        draft: false
+        prerelease: false
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+       upload_url: ${{ steps.create_release.outputs.upload_url }}
+       asset_path: D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\release-artifact.zip
+       asset_name: release-artifact.zip
+       asset_content_type: application/zip
+    - name: Publish release
+      uses: StuYarrow/publish-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        id: ${{ steps.create_release.outputs.id }}
