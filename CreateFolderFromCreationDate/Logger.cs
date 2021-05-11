@@ -54,7 +54,7 @@ namespace CreateFolderFromCreationDate
                 roller.AppendToFile = true;
                 roller.RollingStyle = RollingFileAppender.RollingMode.Size;
                 roller.MaxSizeRollBackups = 4;
-                roller.MaximumFileSize = "100KB";
+                roller.MaximumFileSize = "100MB";
                 roller.StaticLogFileName = true;
                 roller.File = "log-" + DateTime.Now.ToShortDateString().Replace("/", "-") + ".txt";
                 roller.ActivateOptions();

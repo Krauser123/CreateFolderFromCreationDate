@@ -4,13 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Windows.Forms;
 
 namespace CreateFolderFromCreationDate
 {
     internal class FileInfoExtended
     {
-        private static readonly ILog mLog = LogManager.GetLogger(typeof(Logger));
+        private static readonly ILog mLog = Logger.Create();
 
         //These properties do not appears in DataGrids
         [Browsable(false)]

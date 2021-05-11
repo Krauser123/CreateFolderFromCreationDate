@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CreateFolderFromCreationDate
 {
     public partial class FrmMain : Form
     {
-        const string InfoMessage = "CreateFolderFromCreationDate v1.2";
+        const string InfoMessage = "CreateFolderFromCreationDate v1.3";
 
         private ILog _logger = Logger.Create();
         private FileUtils Utils = new FileUtils();
         private BindingSource BindingSource = new BindingSource();
-        private List<string> FilesPathList = new List<string>();
         private List<FileInfoExtended> FilesWithInfoExtended = new List<FileInfoExtended>();
 
         public FrmMain()
@@ -44,18 +44,21 @@ namespace CreateFolderFromCreationDate
             string path = OpenFileDialog();
             if (!string.IsNullOrEmpty(path))
             {
+                //Set path to textbox
                 txtOriginLocation.Text = path;
-                FilesPathList = Utils.SearchFiles(path, ref toolStripLabelInfo, ref toolStripProgressBar).Select(o => o.Value).ToList();
-                LoadFilesToDataGrid();
+                txtLocationToGenerate.Text = path;
+
+                //Search files
+                var FilesPathList = Utils.SearchFiles(path, ref toolStripLabelInfo, chkCheckExtensions.Checked, ref toolStripProgressBar).Select(o => o.Value).ToList();
+                LoadFilesToDataGrid(FilesPathList);
             }
         }
 
-        private void LoadFilesToDataGrid()
+        private void LoadFilesToDataGrid(List<string> filesPathList)
         {
             try
             {
-                //Initialise FileObj
-                FilesWithInfoExtended = FilesPathList.Select(o => new FileInfoExtended(o)).ToList();
+                LoadGlobalList(filesPathList);
 
                 //Refresh grids
                 LoadDataBinding_Files();
@@ -70,6 +73,32 @@ namespace CreateFolderFromCreationDate
         {
             BindingSource.DataSource = FilesWithInfoExtended;
             dgvFiles.DataSource = BindingSource;
+        }
+
+        private void LoadGlobalList(List<string> filesPathList)
+        {
+            //Clean global file list
+            FilesWithInfoExtended.Clear();
+
+            //Calc chunk size and split lists
+            var chunkSize = Math.Round((decimal)filesPathList.Count / 4);
+            var listOfPathsLists = ListExtensions.ChunkBy<string>(filesPathList, (int)chunkSize);
+
+            List<Task<List<FileInfoExtended>>> groupOfTasks = new List<Task<List<FileInfoExtended>>>();
+            foreach (var singlePathList in listOfPathsLists)
+            {
+                Task<List<FileInfoExtended>> task1 = Task.Factory.StartNew(() => singlePathList.Select(o => new FileInfoExtended(o)).ToList());
+                groupOfTasks.Add(task1);
+            }
+
+            //Wait for complete all our threads
+            Task.WaitAll(groupOfTasks.ToArray());
+
+            //Add resolved files to global list
+            foreach (var completedTask in groupOfTasks)
+            {
+                FilesWithInfoExtended.AddRange(completedTask.Result);
+            }
         }
 
         private string OpenFileDialog()
@@ -114,16 +143,26 @@ namespace CreateFolderFromCreationDate
 
         private void BtnSelect_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-            folderBrowserDialog.Description = "Select the directory that you want to use to generate folders";
-            folderBrowserDialog.ShowNewFolderButton = true;
+            string folderSel = "Folder Selection";
 
-            // Show the FolderBrowserDialog.
-            DialogResult result = folderBrowserDialog.ShowDialog();
-            if (result == DialogResult.OK)
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                string folderName = folderBrowserDialog.SelectedPath;
-                txtLocationToGenerate.Text = folderName;
+                openFileDialog.Title = "Select the directory that you want to use to generate folders";
+                openFileDialog.ValidateNames = false;
+                openFileDialog.CheckFileExists = false;
+                openFileDialog.CheckPathExists = true;
+                openFileDialog.FileName = folderSel;
+
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                openFileDialog.Filter = "All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    //Get the path of specified file
+                    txtLocationToGenerate.Text = openFileDialog.FileName.Replace(folderSel, "");
+                }
             }
         }
 
@@ -162,8 +201,9 @@ namespace CreateFolderFromCreationDate
                 }
             }
 
-            MessageBox.Show("Process finished... " + FilesWithInfoExtended.Count + " items moved.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            string logMessage = "Process finished... " + FilesWithInfoExtended.Count + " items moved.";
+            MessageBox.Show(logMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            _logger.Info(logMessage);
         }
-
     }
 }

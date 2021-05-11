@@ -8,15 +8,20 @@ using System.Windows.Forms;
 
 namespace CreateFolderFromCreationDate
 {
-    class FileUtils
+    internal class FileUtils
     {
-        private static readonly ILog _logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog _logger = Logger.Create();
+
+        /// <summary>
+        /// Most used extensions for image and video files
+        /// </summary>
+        private static readonly string[] availableExtensions = new string[] { ".dib", ".arw", ".nrw", ".k25", ".webp", ".jif", ".jfif", ".jfi", ".jp2", "webp", ".indd", ".AI", ".eps", ".pdf", ".heif", ".jpg", ".png", "jpeg", ".eps", ".cr2", ".xcf", ".orf", ".psd", ".sr2", ".raw", ".exif", ".jpe", ".3gp", ".bmp", ".tiff", ".tif", ".gif", ".svg", ".jp2", ".j2k", ".jpf", ".jpx", ".jpm", ".mj2", "mp4", ".mov", ".wmv", ".avi", ".avchd", ".flv", ".f4v", "swf", ".mkv", ".ogg" };
 
         /// <summary>
         /// Search files in folderPath
         /// </summary>
         /// <param name="folderPath"></param>
-        public Dictionary<long, string> SearchFiles(string folderPath, ref ToolStripLabel lblInfoImport, ref ToolStripProgressBar progressBar)
+        public Dictionary<long, string> SearchFiles(string folderPath, ref ToolStripLabel lblInfoImport, bool checkExtensions, ref ToolStripProgressBar progressBar)
         {
             Dictionary<long, string> pathList = new Dictionary<long, string>();
             ToolStripLabel lblInfoImportRef = lblInfoImport;
@@ -63,19 +68,20 @@ namespace CreateFolderFromCreationDate
             filesToProcess.FileFound +=
                 (o, file) =>
                 {
-                    if (!file.IsDirectory)
+                    if ((!file.IsDirectory && !checkExtensions)
+                    || (checkExtensions && availableExtensions.Contains(file.Extension.ToLower())))
                     {
-                        // Read an epub file                        
+                        // Add to
                         pathList.Add(count, file.FullPath);
+                    }
 
-                        // Update the percentage complete...
-                        long progress = ++count * 100 / Interlocked.Read(ref total);
-                        lblInfoImportRef.Text = string.Format("{0} Items found", count);
-                        if (progress > percentage && progress <= 100)
-                        {
-                            percentage = progress;
-                            progressBarRef.Value = Convert.ToInt32(percentage);
-                        }
+                    // Update the percentage complete
+                    long progress = ++count * 100 / Interlocked.Read(ref total);
+                    lblInfoImportRef.Text = string.Format("{0} Items found", count);
+                    if (progress > percentage && progress <= 100)
+                    {
+                        percentage = progress;
+                        progressBarRef.Value = Convert.ToInt32(percentage);
                     }
                 };
 
@@ -118,6 +124,11 @@ namespace CreateFolderFromCreationDate
             return new DateTime(year, month, day, hour, minute, second);
         }
 
+        /// <summary>
+        /// Check if a string have Exif date format
+        /// </summary>
+        /// <param name="dateFormat"></param>
+        /// <returns></returns>
         public bool IsExifFormat(string dateFormat)
         {
             bool isExifFormat = false;
@@ -131,6 +142,11 @@ namespace CreateFolderFromCreationDate
             return isExifFormat;
         }
 
+        /// <summary>
+        /// Check if a string have Exif GPS date format
+        /// </summary>
+        /// <param name="dateFormat"></param>
+        /// <returns></returns>
         public bool IsExifGPSFormat(string dateFormat)
         {
             bool isExifFormat = false;
@@ -144,6 +160,11 @@ namespace CreateFolderFromCreationDate
             return isExifFormat;
         }
 
+        /// <summary>
+        /// Get the lowest year between file properties
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         public int GetMinimunYear(FileInfoExtended file)
         {
             List<DateTime> validDates = new List<DateTime>();
@@ -169,6 +190,11 @@ namespace CreateFolderFromCreationDate
             return year;
         }
 
+        /// <summary>
+        /// Return the datetime inside of Metadata
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
         private DateTime GetDateTimeFromMetadata(MetaData metadata)
         {
             DateTime dateToReturn;
@@ -195,5 +221,6 @@ namespace CreateFolderFromCreationDate
 
             return dateToReturn;
         }
+
     }
 }

@@ -119,6 +119,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Extensions.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Classes\FileInfoExtended.cs" />
     <Compile Include="Classes\FileUtils.cs" />
