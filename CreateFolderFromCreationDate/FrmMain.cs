@@ -77,27 +77,37 @@ namespace CreateFolderFromCreationDate
 
         private void LoadGlobalList(List<string> filesPathList)
         {
-            //Clean global file list
-            FilesWithInfoExtended.Clear();
-
-            //Calc chunk size and split lists
-            var chunkSize = Math.Round((decimal)filesPathList.Count / 4);
-            var listOfPathsLists = ListExtensions.ChunkBy<string>(filesPathList, (int)chunkSize);
-
-            List<Task<List<FileInfoExtended>>> groupOfTasks = new List<Task<List<FileInfoExtended>>>();
-            foreach (var singlePathList in listOfPathsLists)
+            try
             {
-                Task<List<FileInfoExtended>> task1 = Task.Factory.StartNew(() => singlePathList.Select(o => new FileInfoExtended(o)).ToList());
-                groupOfTasks.Add(task1);
+
+                //Clean global file list
+                FilesWithInfoExtended.Clear();
+                dgvFiles.ClearSelection();
+                dgvFiles.DataSource = null;
+
+                //Calc chunk size and split lists
+                var chunkSize = Math.Round((decimal)filesPathList.Count / 4);
+                var listOfPathsLists = ListExtensions.ChunkBy<string>(filesPathList, (int)chunkSize);
+
+                List<Task<List<FileInfoExtended>>> groupOfTasks = new List<Task<List<FileInfoExtended>>>();
+                foreach (var singlePathList in listOfPathsLists)
+                {
+                    Task<List<FileInfoExtended>> task = Task.Factory.StartNew(() => singlePathList.Select(o => new FileInfoExtended(o)).ToList());
+                    groupOfTasks.Add(task);
+                }
+
+                //Wait for complete all our threads
+                Task.WaitAll(groupOfTasks.ToArray());
+
+                //Add resolved files to global list
+                foreach (var completedTask in groupOfTasks)
+                {
+                    FilesWithInfoExtended.AddRange(completedTask.Result);
+                }
             }
-
-            //Wait for complete all our threads
-            Task.WaitAll(groupOfTasks.ToArray());
-
-            //Add resolved files to global list
-            foreach (var completedTask in groupOfTasks)
+            catch(Exception ex)
             {
-                FilesWithInfoExtended.AddRange(completedTask.Result);
+                _logger.Info("" + ex);
             }
         }
 
@@ -197,7 +207,7 @@ namespace CreateFolderFromCreationDate
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex.Message);
+                    _logger.Error(ex.Message + " - " + file.Location);
                 }
             }
 
