@@ -1,4 +1,4 @@
-﻿using log4net;
+using log4net;
 using MetadataExtractor;
 using System;
 using System.Collections.Generic;
@@ -51,7 +51,7 @@ namespace CreateFolderFromCreationDate
             }
             catch (Exception ex) 
             {
-                mLog.Error(ex.Message);
+                mLog.Error(ex.Message + " Path->" + path);
             }
         }
 
@@ -77,7 +77,7 @@ namespace CreateFolderFromCreationDate
             }
             catch (Exception ex)
             {
-                mLog.Error(ex.Message);
+                mLog.Error(ex.Message + " - Location: " + this.Location);
             }
         }
 
