@@ -31,6 +31,7 @@ namespace CreateFolderFromCreationDate
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
@@ -42,7 +43,6 @@ namespace CreateFolderFromCreationDate
             this.lblLocationToGenerate = new System.Windows.Forms.Label();
             this.txtOriginLocation = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.btnSelect = new System.Windows.Forms.Button();
             this.chkCheckExtensions = new System.Windows.Forms.CheckBox();
             this.toolStrip1.SuspendLayout();
@@ -51,6 +51,7 @@ namespace CreateFolderFromCreationDate
             // 
             // toolStrip1
             // 
+            this.toolStrip1.BackColor = System.Drawing.SystemColors.Info;
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripButton,
@@ -61,14 +62,24 @@ namespace CreateFolderFromCreationDate
             this.toolStripLabelInfo});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(704, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(909, 31);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // openToolStripButton
+            // 
+            this.openToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.openToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripButton.Image")));
+            this.openToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.openToolStripButton.Name = "openToolStripButton";
+            this.openToolStripButton.Size = new System.Drawing.Size(29, 28);
+            this.openToolStripButton.Text = "&Open";
+            this.openToolStripButton.Click += new System.EventHandler(this.OpenToolStripButton_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(6, 27);
+            this.toolStripSeparator.Size = new System.Drawing.Size(6, 33);
             // 
             // helpToolStripButton
             // 
@@ -76,7 +87,7 @@ namespace CreateFolderFromCreationDate
             this.helpToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripButton.Image")));
             this.helpToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.helpToolStripButton.Name = "helpToolStripButton";
-            this.helpToolStripButton.Size = new System.Drawing.Size(24, 24);
+            this.helpToolStripButton.Size = new System.Drawing.Size(29, 30);
             this.helpToolStripButton.Text = "He&lp";
             this.helpToolStripButton.Click += new System.EventHandler(this.HelpToolStripButton_Click);
             // 
@@ -85,19 +96,19 @@ namespace CreateFolderFromCreationDate
             this.toolStripProgressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripProgressBar.Name = "toolStripProgressBar";
             this.toolStripProgressBar.Padding = new System.Windows.Forms.Padding(0, 0, 15, 0);
-            this.toolStripProgressBar.Size = new System.Drawing.Size(165, 24);
+            this.toolStripProgressBar.Size = new System.Drawing.Size(215, 28);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 33);
             // 
             // toolStripLabelInfo
             // 
             this.toolStripLabelInfo.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabelInfo.Name = "toolStripLabelInfo";
-            this.toolStripLabelInfo.Size = new System.Drawing.Size(0, 24);
+            this.toolStripLabelInfo.Size = new System.Drawing.Size(0, 30);
             // 
             // dgvFiles
             // 
@@ -105,21 +116,21 @@ namespace CreateFolderFromCreationDate
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvFiles.Location = new System.Drawing.Point(9, 74);
-            this.dgvFiles.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.dgvFiles.Location = new System.Drawing.Point(12, 102);
+            this.dgvFiles.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.RowHeadersWidth = 51;
             this.dgvFiles.RowTemplate.Height = 24;
-            this.dgvFiles.Size = new System.Drawing.Size(686, 325);
+            this.dgvFiles.Size = new System.Drawing.Size(885, 412);
             this.dgvFiles.TabIndex = 3;
             // 
             // btnGenerateFolder
             // 
             this.btnGenerateFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGenerateFolder.Location = new System.Drawing.Point(586, 33);
-            this.btnGenerateFolder.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnGenerateFolder.Location = new System.Drawing.Point(753, 56);
+            this.btnGenerateFolder.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnGenerateFolder.Name = "btnGenerateFolder";
-            this.btnGenerateFolder.Size = new System.Drawing.Size(108, 31);
+            this.btnGenerateFolder.Size = new System.Drawing.Size(144, 38);
             this.btnGenerateFolder.TabIndex = 4;
             this.btnGenerateFolder.Text = "Generate Folders";
             this.btnGenerateFolder.UseVisualStyleBackColor = true;
@@ -127,58 +138,46 @@ namespace CreateFolderFromCreationDate
             // 
             // txtLocationToGenerate
             // 
-            this.txtLocationToGenerate.Location = new System.Drawing.Point(86, 44);
-            this.txtLocationToGenerate.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.txtLocationToGenerate.Location = new System.Drawing.Point(115, 70);
+            this.txtLocationToGenerate.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtLocationToGenerate.Name = "txtLocationToGenerate";
             this.txtLocationToGenerate.ReadOnly = true;
-            this.txtLocationToGenerate.Size = new System.Drawing.Size(324, 20);
+            this.txtLocationToGenerate.Size = new System.Drawing.Size(431, 22);
             this.txtLocationToGenerate.TabIndex = 5;
             // 
             // lblLocationToGenerate
             // 
             this.lblLocationToGenerate.AutoSize = true;
-            this.lblLocationToGenerate.Location = new System.Drawing.Point(7, 47);
-            this.lblLocationToGenerate.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblLocationToGenerate.Location = new System.Drawing.Point(9, 73);
             this.lblLocationToGenerate.Name = "lblLocationToGenerate";
-            this.lblLocationToGenerate.Size = new System.Drawing.Size(68, 13);
+            this.lblLocationToGenerate.Size = new System.Drawing.Size(91, 17);
             this.lblLocationToGenerate.TabIndex = 6;
             this.lblLocationToGenerate.Text = "Output folder";
             // 
             // txtOriginLocation
             // 
-            this.txtOriginLocation.Location = new System.Drawing.Point(86, 21);
-            this.txtOriginLocation.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.txtOriginLocation.Location = new System.Drawing.Point(115, 42);
+            this.txtOriginLocation.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtOriginLocation.Name = "txtOriginLocation";
             this.txtOriginLocation.ReadOnly = true;
-            this.txtOriginLocation.Size = new System.Drawing.Size(324, 20);
+            this.txtOriginLocation.Size = new System.Drawing.Size(431, 22);
             this.txtOriginLocation.TabIndex = 8;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 24);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(9, 45);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(74, 13);
+            this.label2.Size = new System.Drawing.Size(99, 17);
             this.label2.TabIndex = 9;
             this.label2.Text = "Origin location";
             // 
-            // openToolStripButton
-            // 
-            this.openToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.openToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripButton.Image")));
-            this.openToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.openToolStripButton.Name = "openToolStripButton";
-            this.openToolStripButton.Size = new System.Drawing.Size(24, 24);
-            this.openToolStripButton.Text = "&Open";
-            this.openToolStripButton.Click += new System.EventHandler(this.OpenToolStripButton_Click);
-            // 
             // btnSelect
             // 
-            this.btnSelect.Location = new System.Drawing.Point(414, 44);
-            this.btnSelect.Margin = new System.Windows.Forms.Padding(2);
+            this.btnSelect.Location = new System.Drawing.Point(552, 69);
+            this.btnSelect.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnSelect.Name = "btnSelect";
-            this.btnSelect.Size = new System.Drawing.Size(111, 20);
+            this.btnSelect.Size = new System.Drawing.Size(148, 25);
             this.btnSelect.TabIndex = 7;
             this.btnSelect.Text = "Select";
             this.btnSelect.UseVisualStyleBackColor = true;
@@ -187,18 +186,20 @@ namespace CreateFolderFromCreationDate
             // chkCheckExtensions
             // 
             this.chkCheckExtensions.AutoSize = true;
-            this.chkCheckExtensions.Location = new System.Drawing.Point(415, 23);
+            this.chkCheckExtensions.Location = new System.Drawing.Point(553, 43);
+            this.chkCheckExtensions.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.chkCheckExtensions.Name = "chkCheckExtensions";
-            this.chkCheckExtensions.Size = new System.Drawing.Size(111, 17);
+            this.chkCheckExtensions.Size = new System.Drawing.Size(141, 21);
             this.chkCheckExtensions.TabIndex = 10;
             this.chkCheckExtensions.Text = "Check Extensions";
             this.chkCheckExtensions.UseVisualStyleBackColor = true;
             // 
             // FrmMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(704, 409);
+            this.BackColor = System.Drawing.SystemColors.Info;
+            this.ClientSize = new System.Drawing.Size(909, 526);
             this.Controls.Add(this.chkCheckExtensions);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.txtOriginLocation);
@@ -209,9 +210,10 @@ namespace CreateFolderFromCreationDate
             this.Controls.Add(this.dgvFiles);
             this.Controls.Add(this.toolStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.MinimumSize = new System.Drawing.Size(927, 550);
             this.Name = "FrmMain";
-            this.Text = "Create Folder From CreationDate";
+            this.Text = "Create Folder From Metadatas";
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).EndInit();

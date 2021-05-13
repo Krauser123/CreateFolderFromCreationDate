@@ -11,7 +11,7 @@ namespace CreateFolderFromCreationDate
 {
     public partial class FrmMain : Form
     {
-        const string InfoMessage = "CreateFolderFromCreationDate v1.3";
+        const string InfoMessage = "CreateFolderFromCreationDate v1.4";
 
         private ILog _logger = Logger.Create();
         private FileUtils Utils = new FileUtils();
@@ -105,7 +105,7 @@ namespace CreateFolderFromCreationDate
                     FilesWithInfoExtended.AddRange(completedTask.Result);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Info("" + ex);
             }
@@ -183,7 +183,7 @@ namespace CreateFolderFromCreationDate
                 int year = Utils.GetMinimunYear(file);
 
                 //If directory not exist we create it
-                string folderPath = txtLocationToGenerate.Text + "\\" + year;
+                string folderPath = txtLocationToGenerate.Text + year;
                 if (!Directory.Exists(folderPath))
                 {
                     Directory.CreateDirectory(folderPath);
@@ -194,11 +194,15 @@ namespace CreateFolderFromCreationDate
                 {
                     //Check if we can move this file
                     int counter = 0;
-                    var fileToMoveNewPath = folderPath + "\\" + file.Name;
-                    while (File.Exists(fileToMoveNewPath))
+                    var fileToMoveNewPath = folderPath + Path.DirectorySeparatorChar + file.Name;
+                    //File exists in this folder but come from another location
+                    if (File.Exists(fileToMoveNewPath) && fileToMoveNewPath != file.Location)
                     {
-                        counter++;
-                        fileToMoveNewPath = folderPath + "\\" + file.NameWithoutExtension + "-" + counter + file.ExtendedInfo.Extension;
+                        while (File.Exists(fileToMoveNewPath))
+                        {
+                            counter++;
+                            fileToMoveNewPath = folderPath + "\\" + file.NameWithoutExtension + "-" + counter + file.ExtendedInfo.Extension;
+                        }
                     }
 
                     //Move file
