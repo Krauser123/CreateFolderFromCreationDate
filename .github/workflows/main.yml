@@ -35,9 +35,11 @@ jobs:
       run: |
         msbuild.exe CreateFolderFromCreationDate.sln /nologo /nr:false /p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=True /p:platform="Any CPU" /p:configuration="Release" /p:PublishUrl="../_build"
     
-    - name: Delete pbd / cfg
+    - name: Delete cfg
       run: rm D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\CreateFolderFromCreationDate.exe.config
-           rm D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\CreateFolderFromCreationDate.pdb
+    
+    - name: Delete pbd
+      run: rm D:\a\CreateFolderFromCreationDate\CreateFolderFromCreationDate\CreateFolderFromCreationDate\bin\Release\CreateFolderFromCreationDate.pdb
     
     - name: See curent dir
       run: dir    
