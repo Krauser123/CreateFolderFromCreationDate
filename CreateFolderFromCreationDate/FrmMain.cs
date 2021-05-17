@@ -140,15 +140,26 @@ namespace CreateFolderFromCreationDate
 
         private void BtnGenerateFolder_Click(object sender, EventArgs e)
         {
+            if (IsReadyToProcess())
+            {
+                StartMoveFilesProcess();
+            }
+        }
+
+        private bool IsReadyToProcess()
+        {
+            bool isReady = false;
             //Check if we have a valid output directory
             if (!String.IsNullOrEmpty(txtLocationToGenerate.Text) && Directory.Exists(txtLocationToGenerate.Text))
             {
-                StartMoveFilesProcess();
+                isReady = true;
             }
             else
             {
                 MessageBox.Show("Set a location for output", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
+            return isReady;
         }
 
         private void BtnSelect_Click(object sender, EventArgs e)
@@ -216,8 +227,110 @@ namespace CreateFolderFromCreationDate
             }
 
             string logMessage = "Process finished... " + FilesWithInfoExtended.Count + " items moved.";
+            ShowInfoMessage(logMessage);
+        }
+
+        private void FoundRepeatedFiles()
+        {
+            List<FileInfoExtended> repeatedFiles = new List<FileInfoExtended>();
+
+            foreach (var item in FilesWithInfoExtended)
+            {
+                if (!repeatedFiles.Contains(item))
+                {
+                    //Get items with same lenght
+                    var itemsWithSameLenght = this.FilesWithInfoExtended.Where(o => (o.ExtendedInfo.Length == item.ExtendedInfo.Length) && (o.Location != item.Location)).ToList();
+
+                    foreach (var itemRepeated in itemsWithSameLenght)
+                    {
+                        if (FilesContentsAreEqual(item.ExtendedInfo, itemRepeated.ExtendedInfo))
+                        {
+                            if (!repeatedFiles.Contains(itemRepeated))
+                            {
+                                _logger.Info(item.Location + "is the same that " + itemRepeated.Location);
+                                repeatedFiles.Add(itemRepeated);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Iterate over files to delete
+            for (int i = 0; i < repeatedFiles.Count; i++)
+            {
+                repeatedFiles[i].Location.FileRecycle();
+            }
+
+            string logMessage = "Process finished... " + repeatedFiles.Count + " items send to Reycle Bin.";
+            ShowInfoMessage(logMessage);
+        }
+
+        private void ShowInfoMessage(string logMessage)
+        {
             MessageBox.Show(logMessage, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             _logger.Info(logMessage);
+        }
+
+        public static bool FilesContentsAreEqual(FileInfo fileInfo1, FileInfo fileInfo2)
+        {
+            bool result;
+
+            if (fileInfo1.Length != fileInfo2.Length)
+            {
+                result = false;
+            }
+            else
+            {
+                using (var file1 = fileInfo1.OpenRead())
+                {
+                    using (var file2 = fileInfo2.OpenRead())
+                    {
+                        result = StreamsContentsAreEqual(file1, file2);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static bool StreamsContentsAreEqual(Stream stream1, Stream stream2)
+        {
+            const int bufferSize = 1024 * sizeof(Int64);
+            var buffer1 = new byte[bufferSize];
+            var buffer2 = new byte[bufferSize];
+
+            while (true)
+            {
+                int count1 = stream1.Read(buffer1, 0, bufferSize);
+                int count2 = stream2.Read(buffer2, 0, bufferSize);
+
+                if (count1 != count2)
+                {
+                    return false;
+                }
+
+                if (count1 == 0)
+                {
+                    return true;
+                }
+
+                int iterations = (int)Math.Ceiling((double)count1 / sizeof(Int64));
+                for (int i = 0; i < iterations; i++)
+                {
+                    if (BitConverter.ToInt64(buffer1, i * sizeof(Int64)) != BitConverter.ToInt64(buffer2, i * sizeof(Int64)))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        private void DeleteRepeatedFiles_Click(object sender, EventArgs e)
+        {
+            if (IsReadyToProcess())
+            {
+                FoundRepeatedFiles();
+            }
         }
     }
 }

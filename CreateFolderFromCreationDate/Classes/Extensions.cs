@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace CreateFolderFromCreationDate
@@ -16,6 +16,7 @@ namespace CreateFolderFromCreationDate
                 .Select(x => x.Select(v => v.Value).ToList())
                 .ToList();
         }
+
     }
 
     public static class ExtensionDeleteToRecycleBin
@@ -41,5 +42,7 @@ namespace CreateFolderFromCreationDate
         Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(path,
             Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
             Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+
+
     }
 }
